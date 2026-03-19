@@ -1,0 +1,39 @@
+stages:
+  - setup
+  - test
+
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  POSTGRES_USER: reqres
+  POSTGRES_PASSWORD: reqres_secret
+  POSTGRES_DB: reqres_test
+  DATABASE_URL: "postgresql://reqres:reqres_secret@postgres:5432/reqres_test"
+
+cache:
+  paths:
+    - .cache/pip
+
+services:
+  - postgres:15-alpine
+
+setup:
+  stage: setup
+  image: python:3.12-slim
+  script:
+    - pip install -r requirements.txt
+    - alembic upgrade head
+    - python scripts/seed_data.py
+
+test:
+  stage: test
+  image: python:3.12-slim
+  script:
+    - pip install -r requirements.txt
+    - alembic upgrade head
+    - python scripts/seed_data.py
+    - pytest -m "${MARKERS:-smoke}" --alluredir=allure-results -n auto
+  artifacts:
+    when: always
+    paths:
+      - allure-results/
+    expire_in: 1 day
