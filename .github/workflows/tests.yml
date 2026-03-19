@@ -33,6 +33,7 @@ jobs:
 
     env:
       DATABASE_URL: postgresql://reqres:reqres_secret@localhost:5432/reqres_test
+      ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
 
     steps:
       - uses: actions/checkout@v4
